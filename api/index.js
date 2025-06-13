@@ -6,7 +6,7 @@ const cors = require("cors");
 const serverless = require("serverless-http");
 
 const app = express();
-app.use(cors({ origin: "http://localhost:5173" })); // Update this later with frontend URL
+app.use(cors({ origin: process.env.FRONTEND_URL })); // Update this later with frontend URL
 
 // Spotify API credentials
 const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -287,4 +287,4 @@ app.get("/", (req, res) => {
   );
 });
 
-module.exports.handler = serverless(app);
+module.exports = serverless(app);
