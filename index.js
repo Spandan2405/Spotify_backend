@@ -1,16 +1,12 @@
-// BACKEND FLOW: /auth/login -> /auth/callback (access, refresh tokens) -> extractAccessToken -> sending it to the frontend using query params (url)
-// Access token gets expired
-
 const express = require("express");
 const axios = require("axios");
 const querystring = require("querystring");
 require("dotenv").config();
-const serverless = require("serverless-http");
 const cors = require("cors");
+const serverless = require("serverless-http");
 
 const app = express();
-const port = 8000;
-app.use(cors({ origin: "http://localhost:5173" })); // CORS - Cross-Origin Resource Sharing to allow requests
+app.use(cors({ origin: "http://localhost:5173" })); // Update this later with frontend URL
 
 // Spotify API credentials
 const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -18,14 +14,8 @@ const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
-//console.log("Client ID:", clientId);
-//console.log("Client Secret:", clientSecret ? "Loaded" : "Missing");
-//console.log("Redirect URI used:", redirectUri);
-//console.log("Frontend URL:", frontendUrl);
-
 // Login endpoint to initiate Spotify authorization
 app.get("/auth/login", (req, res) => {
-  //console.log("/auth/login ->");
   try {
     const scopes =
       "user-read-private user-follow-read user-read-email playlist-read-private user-library-read user-read-recently-played user-top-read";
@@ -34,7 +24,7 @@ app.get("/auth/login", (req, res) => {
       client_id: clientId,
       scope: scopes,
       redirect_uri: redirectUri,
-      show_dialog: true, // Force Spotify to show the authorization dialog
+      show_dialog: true,
     });
     res.redirect(`https://accounts.spotify.com/authorize?${authQuery}`);
   } catch (error) {
@@ -46,11 +36,6 @@ app.get("/auth/login", (req, res) => {
 // Callback endpoint to handle Spotify authorization code
 app.get("/auth/callback", async (req, res) => {
   const code = req.query.code || null;
-  //console.log(
-  //   "/auth/callback?code -> Received code:",
-  //   code?.slice(0, 20),
-  //   "..."
-  // );
   if (!code) {
     res.redirect(`${frontendUrl}`);
     return null;
@@ -76,17 +61,6 @@ app.get("/auth/callback", async (req, res) => {
 
     if (response.status === 200) {
       const { access_token, refresh_token, expires_in } = response.data;
-      //console.log(
-      //   "/auth/callback -> Access token received:",
-      //   access_token?.slice(0, 20),
-      //   "..."
-      // );
-      //console.log(
-      //   "/auth/callback -> Refresh token received:",
-      //   refresh_token?.slice(0, 20),
-      //   "..."
-      // );
-
       const queryParams = querystring.stringify({
         access_token,
         refresh_token,
@@ -104,7 +78,6 @@ app.get("/auth/callback", async (req, res) => {
 
 // Refresh token endpoint
 app.get("/auth/refresh_token", async (req, res) => {
-  //console.log("/auth/refresh_token ->");
   const { refresh_token } = req.query;
 
   if (!refresh_token) {
@@ -128,10 +101,6 @@ app.get("/auth/refresh_token", async (req, res) => {
       },
     });
 
-    //console.log(
-    //   "/auth/refresh_token -> New access token:",
-    //   response.data.access_token
-    // );
     res.json({
       access_token: response.data.access_token,
       expires_in: response.data.expires_in,
@@ -148,7 +117,6 @@ async function makeSpotifyRequest(url, accessToken, queryParams = {}) {
     throw new Error("No access token provided");
   }
 
-  // Append query parameters to the URL
   const queryString = querystring.stringify(queryParams);
   const fullUrl = queryString ? `${url}?${queryString}` : url;
 
@@ -166,11 +134,6 @@ async function makeSpotifyRequest(url, accessToken, queryParams = {}) {
 // Middleware to extract access token from headers
 const extractAccessToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  //console.log(
-  //   "extractAccessToken -> Authorization header:",
-  //   authHeader.slice(0, 20),
-  //   "..."
-  // );
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).send("Missing or invalid access token");
   }
@@ -211,7 +174,7 @@ app.get("/user/top-tracks", extractAccessToken, async (req, res) => {
     const validTimeRanges = ["short_term", "medium_term", "long_term"];
     const timeRange = validTimeRanges.includes(time_range)
       ? time_range
-      : "medium_term"; // Default to medium_term
+      : "medium_term";
 
     const data = await makeSpotifyRequest(
       "https://api.spotify.com/v1/me/top/tracks",
@@ -244,7 +207,7 @@ app.get("/user/top-artists", extractAccessToken, async (req, res) => {
     const validTimeRanges = ["short_term", "medium_term", "long_term"];
     const timeRange = validTimeRanges.includes(time_range)
       ? time_range
-      : "medium_term"; // Default to medium_term
+      : "medium_term";
 
     const data = await makeSpotifyRequest(
       "https://api.spotify.com/v1/me/top/artists",
@@ -291,7 +254,7 @@ app.get("/artist/:id/top-tracks", extractAccessToken, async (req, res) => {
     const data = await makeSpotifyRequest(
       `https://api.spotify.com/v1/artists/${id}/top-tracks`,
       req.accessToken,
-      { market: "US" } // Market is required for top tracks
+      { market: "US" }
     );
     res.json(data);
   } catch (error) {
