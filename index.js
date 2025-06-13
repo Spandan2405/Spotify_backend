@@ -5,6 +5,7 @@ const express = require("express");
 const axios = require("axios");
 const querystring = require("querystring");
 require("dotenv").config();
+const serverless = require("serverless-http");
 const cors = require("cors");
 
 const app = express();
@@ -298,20 +299,6 @@ app.get("/artist/:id/top-tracks", extractAccessToken, async (req, res) => {
   }
 });
 
-// Artist related artists endpoint
-app.get("/artist/:id/related-artists", extractAccessToken, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const data = await makeSpotifyRequest(
-      `https://api.spotify.com/v1/artists/${id}/related-artists`,
-      req.accessToken
-    );
-    res.json(data);
-  } catch (error) {
-    res.status(500).send("Failed to fetch related artists");
-  }
-});
-
 // Track detail endpoint
 app.get("/track/:id", extractAccessToken, async (req, res) => {
   const { id } = req.params;
@@ -326,38 +313,6 @@ app.get("/track/:id", extractAccessToken, async (req, res) => {
   }
 });
 
-// Track audio features endpoint
-app.get("/track/:id/audio-features", extractAccessToken, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const data = await makeSpotifyRequest(
-      `https://api.spotify.com/v1/audio-features/${id}`,
-      req.accessToken
-    );
-    res.json(data);
-  } catch (error) {
-    res.status(500).send("Failed to fetch track audio features");
-  }
-});
-
-// Recommendations based on track endpoint
-app.get("/recommendations", extractAccessToken, async (req, res) => {
-  const { seed_tracks } = req.query;
-  if (!seed_tracks) {
-    return res.status(400).send("Missing seed_tracks parameter");
-  }
-  try {
-    const data = await makeSpotifyRequest(
-      `https://api.spotify.com/v1/recommendations`,
-      req.accessToken,
-      { seed_tracks, limit: 5 }
-    );
-    res.json(data);
-  } catch (error) {
-    res.status(500).send("Failed to fetch recommendations");
-  }
-});
-
 // Logout endpoint
 app.get("/auth/logout", (req, res) => {
   res.redirect(frontendUrl);
@@ -369,6 +324,4 @@ app.get("/", (req, res) => {
   );
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://127.0.0.1:${port}`);
-});
+module.exports.handler = serverless(app);
