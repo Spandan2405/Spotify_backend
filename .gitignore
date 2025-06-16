@@ -19,3 +19,4 @@ yarn-error.log*
 .idea/
 *.sublime-workspace
 *.sublime-project
+.vercel
