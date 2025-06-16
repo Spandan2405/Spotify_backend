@@ -6,7 +6,7 @@ const cors = require("cors");
 const serverless = require("serverless-http");
 
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL })); // Update this later with frontend URL
+app.use(cors("https://spotify-insights-dashboard.vercel.app/")); // Update this later with frontend URL
 
 // Spotify API credentials
 const clientId = process.env.SPOTIFY_CLIENT_ID;
