@@ -2,15 +2,7 @@
   "version": 2,
   "framework": null,
   "functions": {
-    "api/index.js": {
-      "handler": "index.handler"
-    }
+    "api/index.js": {}
   },
-  "routes": [{ "src": "/(.*)", "dest": "/api/index.js" }],
-  "env": {
-    "SPOTIFY_CLIENT_ID": "c02e56d361684be68b978c01b71e6dc3",
-    "SPOTIFY_CLIENT_SECRET": "6ab6e4d1264647e38d444c7a14e99571",
-    "SPOTIFY_REDIRECT_URI": "https://spotify-backend-six.vercel.app/auth/callback",
-    "FRONTEND_URL": "https://spotify-insights-dashboard.vercel.app/"
-  }
+  "routes": [{ "src": "/(.*)", "dest": "/api/index.js" }]
 }
