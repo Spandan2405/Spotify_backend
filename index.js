@@ -13,7 +13,7 @@ const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-// const port = 8000;
+const port = 8000;
 
 // Login endpoint to initiate Spotify authorization
 app.get("/auth/login", (req, res) => {
@@ -287,8 +287,8 @@ app.get("/", (req, res) => {
     "Welcome to the Spotify Backend API. Use /auth/login to start the authentication process."
   );
 });
-// app.listen(port, () => {
-//   console.log(`Server running at http://127.0.0.1:${port}`);
-// });
+app.listen(port, () => {
+  console.log(`Server running at http://127.0.0.1:${port}`);
+});
 
 module.exports = serverless(app);
