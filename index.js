@@ -7,6 +7,7 @@ const serverless = require("serverless-http");
 
 const app = express();
 app.use(cors("https://spotify-insights-dashboard.vercel.app/")); // Update this later with frontend URL
+// app.use(cors("http://127.0.0.1:8000/")); // Update this later with frontend URL
 
 // Spotify API credentials
 const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -38,7 +39,7 @@ app.get("/auth/login", (req, res) => {
 app.get("/auth/callback", async (req, res) => {
   const code = req.query.code || null;
   if (!code) {
-    res.redirect(`${frontendUrl}`);
+    res.redirect(`${frontendUrl}/profile`);
     return null;
   }
 
@@ -67,7 +68,7 @@ app.get("/auth/callback", async (req, res) => {
         refresh_token,
         expires_in,
       });
-      res.redirect(`${frontendUrl}?${queryParams}`);
+      res.redirect(`${frontendUrl}/profile?${queryParams}`);
     } else {
       res.redirect(`/?${querystring.stringify({ error: "invalid token" })}`);
     }
@@ -106,6 +107,7 @@ app.get("/auth/refresh_token", async (req, res) => {
       access_token: response.data.access_token,
       expires_in: response.data.expires_in,
     });
+    res.redirect(`${frontendUrl}/profile`);
   } catch (error) {
     console.error("Error refreshing token:", error.message);
     res.status(500).send("Failed to refresh token");
